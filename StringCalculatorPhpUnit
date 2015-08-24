@@ -1,0 +1,159 @@
+<?php
+class UnitTest extends PHPUnit_Framework_TestCase
+{
+    /**
+     * @dataProvider additionProvider
+     */
+    public function testAdd($a, $expected, $delimeter1, $delimeter2)
+    {
+	if(isset($a)&&("{$a}"!="")){
+		if((isset($delimeter1)&&("{$delimeter1}"!=""))&&(isset($delimeter2)&&("{$delimeter2}"!="")))
+		{
+			$a=preg_replace("/\\\\n/", "\n", $a);
+			$delimeter1=preg_replace("/\\\\n/", "\n", $delimeter1);	
+			$delimeter2=preg_replace("/\\\\n/", "\n", $delimeter2);
+			if((!(preg_match("/^[0-9]+$/", $delimeter1)))&&(!(preg_match("/^[0-9]+$/", $delimeter1)))){
+				if (strpos($a,"\\\\[{$delimeter1}][{$delimeter2}]\n") !== false) {
+					$a=str_replace("\\\\[{$delimeter1}][{$delimeter2}]\n","",$a);
+					$a=str_replace("{$delimeter2}","{$delimeter1}",$a);
+					if (str_replace("{$delimeter1}\n","{$delimeter1}", $a)!="{$a}") {
+						$syntax=" --> syntax error";
+					}
+					
+					$a=explode($delimeter1,$a);
+					$answer=0;
+					$negatives="";
+					$codeunits = array();
+					for ($i = 0; $i<0xD800; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+					for ($i = 0xE000; $i<0xFFFF; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+					$letters = implode($codeunits);
+					$numbers = array("0","1","2","3","4","5","6","7","8","9","-");
+					$letters = str_replace($numbers,"",$numbers);
+					foreach($a as $value){
+						if(str_replace($letters, "", $value)<1000){
+							if(str_replace($letters, "", $value)<0)
+							{
+								$negatives=$negatives.$value;
+								$value=str_replace($letters, "", $value)*-1;
+								
+							};
+						$answer=$answer+str_replace($letters, "", $value);
+						}
+						else{}
+					}
+					$a=$answer;
+					if($negatives!=""){throw new InvalidArgumentException(" ---> Error Negative Number Array ".$negatives, 10);}
+					if(isset($syntax)){throw new InvalidArgumentException($syntax, 10);}
+
+				}
+				else{throw new InvalidArgumentException("invalid string syntax",10);}
+			}
+			else{throw new InvalidArgumentException("Invalid Delimeter Syntax, Delimeter cannot only contain numbers",10);}
+		}
+		elseif(isset($delimeter1)&&("{$delimeter1}"!=""))
+		{
+			$a=preg_replace("/\\\\n/", "\n", $a);
+			$delimeter1=preg_replace("/\\\\n/", "\n", $delimeter1);	
+			if((!(preg_match("/^[0-9]+$/", $delimeter1)))){
+				if (strpos($a,"\\\\[{$delimeter1}]\n") !== false) {
+					$a=str_replace("\\\\[{$delimeter1}]\n","",$a);
+					if (str_replace("{$delimeter1}\n","{$delimeter1}", $a)!="{$a}") {
+						$syntax=" --> syntax error";
+					}
+					
+					$a=explode($delimeter1,$a);
+					$negatives="";
+				    	$answer=0;
+					for ($i = 0; $i<0xD800; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+					for ($i = 0xE000; $i<0xFFFF; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+					$letters = implode($codeunits);
+					$numbers = array("0","1","2","3","4","5","6","7","8","9","-");
+					$letters = str_replace($numbers,"",$numbers);
+					foreach($a as $value){
+						if(str_replace($letters, "", $value)<1000){
+							if(str_replace($letters, "", $value)<0)
+							{
+								$negatives=$negatives.$value.",";
+								$value=str_replace($letters, "", $value)*-1;						
+							};
+						$answer=$answer+str_replace($letters, "", $value);
+						}
+						else
+						{}
+					}
+					$a=$answer;
+					if($negatives!=""){throw new InvalidArgumentException(" ---> Error Negative Number Array ".$negatives, 10);}
+					if(isset($syntax)){throw new InvalidArgumentException($syntax, 10);}
+				}
+				else{throw new InvalidArgumentException("Invalid Delimeter Syntax, Delimeter cannot only contain numbers",10);}
+				
+			}
+		}
+		elseif($a!="")
+		{
+			$a=preg_replace("/\\\\n/", "\n", $a);
+			$delimeter1=",";	
+			$a=str_replace("\\\\[{$delimeter1}]\n","",$a);
+			if (str_replace("{$delimeter1}\n","{$delimeter1}", $a)!="{$a}") {
+				$syntax=" --> syntax error";
+			}
+			
+			$a=explode($delimeter1,$a);
+			$negatives="";
+			$answer=0;
+			for ($i = 0; $i<0xD800; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+			for ($i = 0xE000; $i<0xFFFF; $i++)$codeunits[] = iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+			$letters = implode($codeunits);
+			$numbers = array("0","1","2","3","4","5","6","7","8","9","-");
+			$letters = str_replace($numbers,"",$numbers);
+			foreach($a as $value){
+				if(str_replace($letters, "", $value)<1000){
+					if(str_replace($letters, "", $value)<0)
+					{
+						$negatives=$negatives.$value.",";
+						$value=str_replace($letters, "", $value)*-1;						
+					};
+				$answer=$answer+str_replace($letters, "", $value);
+				}
+				else
+				{}
+			}
+			$a=$answer;
+			if($negatives!=""){throw new InvalidArgumentException(" ---> Error Negative Number Array ".$negatives, 10);}
+			if(isset($syntax)){throw new InvalidArgumentException($syntax, 10);}
+
+		}
+		else{$a= "0";}
+	}
+	else{$a= "0";}
+
+	$this->assertEquals($expected, $a);
+
+    }
+
+
+    public function additionProvider()
+    {
+	
+        return array(
+		array('', 0, "",""),#should return 0
+		array('1,2', 3, "",""),#should return 3
+	        array('1', 1 ,"",""),#shouldReturn(1);
+		array('-1', 1, "",""),#shouldReturn(1);
+		array('1,2,3,4,5', 15, "",""),#shouldReturn(15);
+		array("\\\\[,][\n]\n1\n2,3",6,",","\n"),#shouldReturn(6) and error;
+		array("1,-2,3",6,"",""),#shouldReturn(6) and error;
+		array('1,2,1001,3',6,"",""),#should return (6)
+		array("\\\\[***]\n1***2***3",6,'***',""),#shouldReturn(6) and error;
+		array("\\\\[*][%]\n1*2%3",6,"*","%"),#shouldReturn(6) and error;
+		array("1,\n",1,"",""),#shouldReturn(1);
+		array("\\\\[***]\n1***\n2***3",6,'***',''),#shouldReturn(6);
+		array("\\\\[***][,,,]\n1***\n2,,,3",6,'***',',,,')#shouldReturn(6);
+	  
+        );
+    }
+}
+
+
+
+?>
